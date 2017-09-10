@@ -12,20 +12,20 @@ using System.Web.Http;
 
 namespace Sabio.Web.Controllers.Api
 {
-    [RoutePrefix("api/CalendarEvents")]
+    [RoutePrefix("api/CalendarSession")]
     public class CalendarEventsApiController : ApiController
     {
-        CalendarEventService _svc;
+        CalendarSessionService _svc;
 
-        public CalendarEventsApiController(CalendarEventService svc)
+        public CalendarEventsApiController(CalendarSessionService svc)
         {
             _svc = svc;
         }
 
         [Route][HttpGet]
-        public HttpResponseMessage GetByMonth([FromUri] CalendarEventRequest model)
+        public HttpResponseMessage GetByMonth([FromUri] CalendarSessionRequest model)
         {
-            ItemsResponse<CalendarEvent> response = new ItemsResponse<CalendarEvent>();
+            ItemsResponse<CalendarSession> response = new ItemsResponse<CalendarSession>();
             response.Items = _svc.GetByMonth(model);
             return Request.CreateResponse(HttpStatusCode.OK, response);
         }
