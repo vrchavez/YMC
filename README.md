@@ -1,3 +1,3 @@
 # YMC
 Snippets from YMC Web Application
-[Link Text](http://sawubona.azurewebsites.net/)
+[Website Here](http://sawubona.azurewebsites.net/)
