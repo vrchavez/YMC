@@ -2,4 +2,4 @@
 Snippets from YMC Web Application
 
 
-[Website Here](http://sawubona.azurewebsites.net/)
+[sawubona.azurewebsites.net](http://sawubona.azurewebsites.net/)
