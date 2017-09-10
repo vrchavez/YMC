@@ -13,7 +13,7 @@ using System.Web.Http;
 namespace Sabio.Web.Controllers.Api
 {
     [RoutePrefix("api/CalendarSession")]
-    public class CalendarEventsApiController : ApiController
+    public class CalendarSessionApiController : ApiController
     {
         CalendarSessionService _svc;
 
