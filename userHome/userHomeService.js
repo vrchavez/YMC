@@ -16,7 +16,7 @@
 
         function _getCalendarEvents(data) {
             var settings = {
-                url: '/api/CalendarEvents/',
+                url: '/api/CalendarSession/',
                 method: 'GET',
                 cache: false,
                 contentType: 'json; charset=UTF-8',
