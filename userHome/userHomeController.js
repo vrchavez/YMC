@@ -26,8 +26,6 @@
         vm.events = [];
         vm.appointments = [];
         vm.appointmentTypes = [];
-        vm.newStartDate;
-        vm.newEndDate;
         vm.getId;
         var date = new Date();
         var d = date.getDate();
