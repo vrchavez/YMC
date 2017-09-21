@@ -106,7 +106,7 @@
         function _deleteEvent() {
             swal({
                 title: "Are you sure?",
-                text: "Activity will be deleted forever!",
+                text: "Event will be deleted from calendar",
                 type: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "red",
@@ -125,7 +125,7 @@
         function _deleteSuccess(data) {
             for (var i = 0; i < vm.appointments.length; i++) {
                 if (vm.appointments[i].id == vm.item.id) {
-                    swal("Deleted!", "Activity has been deleted.", "success");
+                    swal("Deleted!", "Event has been deleted.", "success");
                     vm.remove(i);
                     vm.item = {};
                 }
@@ -280,7 +280,7 @@
             vm.isPressed = false;
             vm.appointForm.$setPristine();
             $.growl({
-                message: 'Activity Posted Successfully',
+                message: 'Event Posted Successfully',
             }, {
                     element: 'body',
                     type: 'success',
@@ -317,7 +317,7 @@
             vm.isPressed = false;
             vm.appointForm.$setPristine();
             $.growl({
-                message: 'Activity Posted Successfully',
+                message: 'Event Updated Successfully',
             }, {
                     element: 'body',
                     type: 'success',
@@ -414,10 +414,6 @@
                 }          
             }
         };
-
-        vm.alertOnEventClick  = function () {
-            console.log("THIS WORKS");
-        }
 
         vm.eventSources1 = [vm.calEventsExt, vm.newEvents];
         vm.eventSources = [vm.calEventsExt, vm.eventsF, vm.events, vm.appointments];
