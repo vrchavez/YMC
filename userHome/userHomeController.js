@@ -5,41 +5,37 @@
     userHomeController.$inject = ['userHomeService', '$stateParams', 'userService', '$scope', '$state', 'personService'];
 
     function userHomeController(userHomeService, $stateParams, userService, $scope, $state, personService) {
-        var vm = this;
-        vm.$scope = $scope;
+        var vm = this;     
         vm.$onInit = _init;
-        vm.closer = _closer;
-        vm.userHomeService = userHomeService;
-        vm.userService = userService;
-        vm.currentUser;
-        vm.deleteEvent = _deleteEvent;
-        vm.isPressed = false;
-        vm.item = {};
-        vm.appointForm = null;
+        vm.$scope = $scope;
+        vm.personId = $stateParams.id;
         vm.startDateBeforeRender = _startDateBeforeRender;
         vm.startDateOnSetTime = _startDateOnSetTime;
         vm.endDateBeforeRender = _endDateBeforeRender;
         vm.endDateOnSetTime = _endDateOnSetTime;
+        vm.deleteEvent = _deleteEvent;
+        vm.closer = _closer;        
+        vm.userHomeService = userHomeService;
+        vm.userService = userService;       
         vm.personService = personService;
         vm.userService = userService;
-        vm.dateHere;
+        vm.isPressed = false;
+        vm.appointForm = null;
+        vm.sendToSql = {};
+        vm.item = {};
         vm.events = [];
         vm.appointments = [];
         vm.appointmentTypes = [];
-        vm.getId;
         var date = new Date();
         var d = date.getDate();
         var m = date.getMonth();
         var y = date.getFullYear();
-        vm.getId = $stateParams.id;
         vm.userInfo = null; // info about the currently logged-in user
         vm.person = null // personBase for the person being examined
-        //vm.calendar.fullCalendar('refetchEvents');
-        var firstDay = new Date(y, m, 1);
-        var lastDay = new Date(y, m + 1, 1);
-        var firstFormat = firstDay.toISOString();
-        var lastFormat = lastDay.toISOString();
-        vm.sendToSql = {};
+        var firstDayOfMonth = new Date(y, m, 1);
+        var lastDayOfMonth = new Date(y, m + 1, 1);
+        var firstDayIso = firstDayOfMonth.toISOString();
+        var lastDayIso = lastDayOfMonth.toISOString();
 
         function _init() {
             vm.userService.getUserInfo()
@@ -65,20 +61,17 @@
                 )
                 .then(function (data) {
                     vm.appointmentTypes = data;
-                    _convertToJson(vm.getId, firstFormat, lastFormat);
+                    _searchDBForEvents(vm.getId, firstDayIso, lastDayIso);
                 }, _getAllError)
         }
 
-        function _convertToJson(id, start, end) {
+        function _searchDBForEvents(id, start, end) {
             vm.sendToSql = { PersonId: id, CriteriaStartDate: start, CriteriaEndDate: end };
             vm.userHomeService.getCalendarEvents(vm.sendToSql)
                 .then(_getAllSuccess, _getAllError);
             vm.userHomeService.getAppointments(vm.sendToSql)
                 .then(_getAppointmentsSuccess, _getAllError); 
         }
-
-
-
 
         function _splitDates(x) {
             return x.split("T")[0].split("-");
@@ -171,7 +164,7 @@
 
         function _getUserSuccess(data) {
             vm.getId = data.item.id;
-            _convertToJson(vm.getId, firstFormat, lastFormat);
+            _searchDBForEvents(vm.getId, firstFormat, lastFormat);
         }
 
         function _getUserError(error) {
@@ -235,52 +228,17 @@
             vm.isPressed = false;
         }
         
-        /* event source that contains custom events on the scope */
-
         /* event source that calls a function on every view switch */
         vm.eventsF = function (start, end, timezone, callback) {
-            //var s = new Date(start).getTime() / 1000;
-            //var e = new Date(end).getTime() / 1000;
-            //var m = new Date(start).getMonth();
-            //var events = [{ title: 'Feed Me ' + m, start: s + (50000), end: s + (100000), allDay: false, className: ['customFeed'] }];
-            //vm.userHomeService.getAll()
-            ////    .then(_getAllSuccess, _getAllError);
-            //callback(vm.events);
-            _convertToJson(vm.getId, start.toISOString(), end.toISOString());
-            callback(vm.events);
-            callback(vm.appointments);
+            _searchDBForEvents(vm.getId, start.toISOString(), end.toISOString());
+            callback(vm.events); //Refresh Session Events in Calendar
+            callback(vm.appointments); //Refresh Personal Events in Calendar
         };
 
         vm.calEventsExt = {
             color: '#8BC34A',
             textColor: '#fff',
             events: []
-        };
-        /* alert on eventClick */
-        vm.alertOnEventClick = function (date, jsEvent, view) {
-            vm.alertMessage = (date.title + ' was clicked ');
-        };
-        /* alert on Drop */
-        vm.alertOnDrop = function (event, delta, revertFunc, jsEvent, ui, view) {
-            vm.alertMessage = ('Event Droped to make dayDelta ' + delta);
-        };
-        /* alert on Resize */
-        vm.alertOnResize = function (event, delta, revertFunc, jsEvent, ui, view) {
-            vm.alertMessage = ('Event Resized to make dayDelta ' + delta);
-        };
-
-        /* add and removes an event source of choice */
-        vm.addRemoveEventSource = function (sources, source) {
-            var canAdd = 0;
-            angular.forEach(sources, function (value, key) {
-                if (sources[key] === source) {
-                    sources.splice(key, 1);
-                    canAdd = 1;
-                }
-            });
-            if (canAdd === 0) {
-                sources.push(source);
-            }
         };
 
         /* ADD EVENT */
@@ -392,7 +350,7 @@
             }
         }
 
-        /* remove event */
+        /* Remove event from front end (Appointments array)*/
         vm.remove = function (index) {
             vm.appointments.splice(index, 1);
         };
@@ -423,18 +381,10 @@
                     left: 'title',
                     center: '',
                     right: 'prev, next'
-                    //ADD DAILY VIEW****
                 },
-                //dayRender: function (date, cell) {
-                //    cell.css("font-color", 'red');
-                //},
-                //viewRender: function (view, element) {
-                //    $('.block-header-calendar > h2 > #dater').html(view.title);
-
-                //},
                 eventClick: function (event, jsEvent, view) {
                     if (event.session) {
-                        console.log(event.sessId);  //HERE WE SHOULD ALSO CHECK IF THE LOGGED IN USER IS AN ADMIN
+                         //HERE WE SHOULD ALSO CHECK IF THE LOGGED IN USER IS AN ADMIN
                         $state.go('sessionDetail', { id: event.sessId }, { reload: true });
                     } 
                     else {
